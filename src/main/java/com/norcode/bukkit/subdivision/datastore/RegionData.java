@@ -1,7 +1,10 @@
 package com.norcode.bukkit.subdivision.datastore;
 
-import com.norcode.bukkit.subdivision.flag.Flag;
+import com.norcode.bukkit.subdivision.rtree.Bounds;
+import org.bukkit.World;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -46,6 +49,21 @@ public class RegionData {
 		this.priority = priority;
 		this.owners = owners;
 		this.flags = flags;
+	}
+
+	public RegionData(World world, Bounds bounds) {
+		this.id = UUID.randomUUID();
+		this.worldId = world.getUID();
+		this.minX = bounds.getX1();
+		this.minY = bounds.getY1();
+		this.minZ = bounds.getZ1();
+		this.maxX = bounds.getX2();
+		this.maxY = bounds.getY2();
+		this.maxZ = bounds.getZ2();
+		this.parentId = null;
+		this.flags = new HashMap<String, String>();
+		this.owners = new HashSet<UUID>();
+		this.priority = 0;
 	}
 
 	public int getMinX() {
@@ -94,5 +112,9 @@ public class RegionData {
 
 	public Map<String, String> getFlags() {
 		return flags;
+	}
+
+	public Bounds getBounds() {
+		return new Bounds(minX, minY, minZ, maxX, maxY, maxZ);
 	}
 }

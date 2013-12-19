@@ -9,7 +9,7 @@ import java.util.List;
 
 public abstract class Datastore {
 
-	private static HashMap<String, Class<? extends Datastore>> registry;
+	private static HashMap<String, Class<? extends Datastore>> registry = new HashMap<String, Class<? extends Datastore>>();
 
 	protected static Class<? extends Datastore> getImplementation(String type) throws DatastoreException {
 		if (!registry.containsKey(type.toLowerCase())) {
@@ -22,8 +22,16 @@ public abstract class Datastore {
 		if (registry.containsKey(string.toLowerCase())) {
 			throw new DatastoreException("There is already a datastore implementation registered as " + string.toLowerCase());
 		}
+		registry.put(string, clazz);
 	}
 
+	static {
+		try {
+			register("yaml", YamlDatastore.class);
+		} catch (DatastoreException ex) {
+			ex.printStackTrace();
+		}
+	}
 	protected SubdivisionPlugin plugin;
 
 	Datastore(SubdivisionPlugin plugin) {
@@ -31,12 +39,24 @@ public abstract class Datastore {
 	}
 
 	public final boolean enable() {
+		boolean enabled;
 		try {
-			return this.onEnable();
+			if (!this.onEnable()) {
+				return false;
+			}
 		} catch (DatastoreException e) {
 			e.printStackTrace();
 			return false;
 		}
+
+		try {
+			plugin.getRegionManager().initialize(loadRegions());
+			plugin.debug("Loaded " + plugin.getRegionManager().getAll().size() + " Regions in " + plugin.getRegionManager().getWorldTrees().size() + " worlds");
+		} catch (DatastoreException e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
 	}
 
 	public final void disable() {
@@ -69,8 +89,8 @@ public abstract class Datastore {
 	protected abstract void onDisable() throws DatastoreException;
 	protected abstract boolean onEnable() throws DatastoreException;
 	protected abstract List<RegionData> loadRegions() throws DatastoreException;
-	protected abstract void saveRegions(List<RegionData> regions) throws DatastoreException;
-	protected abstract void saveRegion(RegionData region) throws DatastoreException;
-	protected abstract void deleteRegion(RegionData region) throws DatastoreException;
+	public abstract void saveRegions(List<RegionData> regions) throws DatastoreException;
+	public abstract void saveRegion(RegionData region) throws DatastoreException;
+	public abstract void deleteRegion(RegionData region) throws DatastoreException;
 
 }

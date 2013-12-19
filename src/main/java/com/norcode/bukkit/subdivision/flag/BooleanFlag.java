@@ -2,6 +2,15 @@ package com.norcode.bukkit.subdivision.flag;
 
 
 public class BooleanFlag extends Flag<Boolean> {
+
+	public BooleanFlag(String name) {
+		super(name);
+	}
+
+	public BooleanFlag(String name, String description) {
+		super(name, description);
+	}
+
 	@Override
 	public Boolean parseValue(String input) throws IllegalArgumentException {
 		return Boolean.parseBoolean(input);

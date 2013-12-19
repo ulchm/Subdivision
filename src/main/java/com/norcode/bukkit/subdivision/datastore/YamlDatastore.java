@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -22,7 +23,7 @@ public class YamlDatastore extends Datastore {
 
 	private String fileName;
 
-	YamlDatastore(SubdivisionPlugin plugin) {
+	public YamlDatastore(SubdivisionPlugin plugin) {
 		super(plugin);
 
 	}
@@ -70,12 +71,13 @@ public class YamlDatastore extends Datastore {
 			for (String regionId: getConfig().getConfigurationSection(worldIdString).getKeys(false)) {
 				id = UUID.fromString(regionId);
 				cfg = getConfig().getConfigurationSection(worldIdString + "." + regionId);
-				minX = cfg.getInt("min-x");
-				minY = cfg.getInt("min-y");
-				minZ = cfg.getInt("min-z");
-				maxX = cfg.getInt("max-x");
-				maxY = cfg.getInt("max-y");
-				maxZ = cfg.getInt("max-z");
+				List<Integer> bounds = cfg.getIntegerList("bounds");
+				minX = bounds.get(0);
+				minY = bounds.get(1);
+				minZ = bounds.get(2);
+				maxX = bounds.get(3);
+				maxY = bounds.get(4);
+				maxZ = bounds.get(5);
 				if (!cfg.contains("parent")) {
 					parentId = null;
 				} else {
@@ -88,8 +90,10 @@ public class YamlDatastore extends Datastore {
 				}
 				flags = new HashMap<String, String>();
 				flagCfg = cfg.getConfigurationSection("flags");
-				for (String key: flagCfg.getKeys(false)) {
-					flags.put(key.toLowerCase(), flagCfg.getString(key));
+				if (flagCfg != null) {
+					for (String key: flagCfg.getKeys(false)) {
+						flags.put(key.toLowerCase(), flagCfg.getString(key));
+					}
 				}
 				results.add(new RegionData(minX, minY, minZ, maxX, maxY, maxZ, id, parentId, worldId, priority, owners, flags));
 			}
@@ -98,7 +102,7 @@ public class YamlDatastore extends Datastore {
 	}
 
 	@Override
-	protected void saveRegions(List<RegionData> regions) throws DatastoreException {
+	public void saveRegions(List<RegionData> regions) throws DatastoreException {
 		ConfigurationSection cfg;
 		ConfigurationSection flagCfg;
 		ConfigurationSection wcfg;
@@ -112,12 +116,7 @@ public class YamlDatastore extends Datastore {
 
 	private ConfigurationSection saveRegionData(RegionData data) {
 		ConfigurationSection cfg = getConfig().createSection(data.getWorldId().toString() + "." + data.getId().toString());
-		cfg.set("min-x", data.getMinX());
-		cfg.set("min-y", data.getMinY());
-		cfg.set("min-z", data.getMinZ());
-		cfg.set("max-x", data.getMaxX());
-		cfg.set("max-y", data.getMaxY());
-		cfg.set("max-z", data.getMaxZ());
+		cfg.set("bounds", Arrays.asList(new Integer[] {data.getMinX(), data.getMinY(), data.getMinZ(), data.getMaxX(), data.getMaxY(), data.getMaxZ()}));
 		cfg.set("priority", data.getPriority());
 		if (data.getParentId() != null) {
 			cfg.set("parent", data.getParentId().toString());
@@ -137,13 +136,13 @@ public class YamlDatastore extends Datastore {
 	}
 
 	@Override
-	protected void saveRegion(RegionData region) throws DatastoreException {
+	public void saveRegion(RegionData region) throws DatastoreException {
 		saveRegionData(region);
 		saveConfig();
 	}
 
 	@Override
-	protected void deleteRegion(RegionData region) throws DatastoreException {
+	public void deleteRegion(RegionData region) throws DatastoreException {
 		String key = region.getWorldId().toString() + "." + region.getId().toString();
 		getConfig().set(key, null);
 		saveConfig();

@@ -2,6 +2,14 @@ package com.norcode.bukkit.subdivision.flag;
 
 public class StringFlag extends Flag<String> {
 
+	protected StringFlag(String name) {
+		super(name);
+	}
+
+	protected StringFlag(String name, String description) {
+		super(name, description);
+	}
+
 	@Override
 	public String parseValue(String input) throws IllegalArgumentException {
 		return input;

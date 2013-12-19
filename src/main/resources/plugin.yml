@@ -1,0 +1,12 @@
+main: ${project.main}
+author: ${project.authors}
+version: ${project.version}
+name: ${project.name}
+softdepend: ${project.softdepend}
+commands:
+  region:
+    aliases: [sd]
+    description: root subdivision command
+  debug:
+    aliases: [dbg]
+
