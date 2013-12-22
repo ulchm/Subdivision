@@ -52,6 +52,7 @@ public class YamlDatastore extends Datastore {
 		UUID id;
 		UUID parentId;
 		Set<UUID> owners;
+		Set<UUID> members;
 		Map<String, String> flags;
 		int minX, minY, minZ, maxX, maxY, maxZ, priority;
 
@@ -88,6 +89,10 @@ public class YamlDatastore extends Datastore {
 				for (String uuidS: cfg.getStringList("owners")) {
 					owners.add(UUID.fromString(uuidS));
 				}
+				members = new HashSet<UUID>();
+				for (String uuidS: cfg.getStringList("members")) {
+					members.add(UUID.fromString(uuidS));
+				}
 				flags = new HashMap<String, String>();
 				flagCfg = cfg.getConfigurationSection("flags");
 				if (flagCfg != null) {
@@ -95,7 +100,7 @@ public class YamlDatastore extends Datastore {
 						flags.put(key.toLowerCase(), flagCfg.getString(key));
 					}
 				}
-				results.add(new RegionData(minX, minY, minZ, maxX, maxY, maxZ, id, parentId, worldId, priority, owners, flags));
+				results.add(new RegionData(minX, minY, minZ, maxX, maxY, maxZ, id, parentId, worldId, priority, owners, members, flags));
 			}
 		}
 		return results;
@@ -121,11 +126,19 @@ public class YamlDatastore extends Datastore {
 		if (data.getParentId() != null) {
 			cfg.set("parent", data.getParentId().toString());
 		}
-		List<String> ownerIds = new ArrayList<String>();
+		// owners
+		List<String> uids = new ArrayList<String>();
 		for (UUID ownerId: data.getOwners()) {
-			ownerIds.add(ownerId.toString());
+			uids.add(ownerId.toString());
 		}
-		cfg.set("owners", ownerIds);
+		cfg.set("owners", uids);
+		// members
+		uids = new ArrayList<String>();
+		for (UUID memberId: data.getMembers()) {
+			uids.add(memberId.toString());
+		}
+		cfg.set("members", uids);
+		// flags
 		if (data.getFlags().size() > 0) {
 			ConfigurationSection flagCfg = cfg.createSection("flags");
 			for (Map.Entry<String, String> flag: data.getFlags().entrySet()) {

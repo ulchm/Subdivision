@@ -1,6 +1,9 @@
 package com.norcode.bukkit.subdivision.region;
 
 
+import com.norcode.bukkit.subdivision.flag.perm.BuildingFlag;
+import com.norcode.bukkit.subdivision.flag.perm.PermissionFlag;
+import com.norcode.bukkit.subdivision.flag.perm.RegionPermissionState;
 import com.norcode.bukkit.subdivision.rtree.Bounded;
 import com.norcode.bukkit.subdivision.rtree.Bounds;
 import com.norcode.bukkit.subdivision.datastore.RegionData;
@@ -9,7 +12,6 @@ import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -26,6 +28,7 @@ public class Region implements Bounded {
 	private UUID worldId;
 	private UUID parentId;
 	private Set<UUID> owners;
+	private Set<UUID> members;
 	private Map<Flag, Object> flags = new HashMap<Flag, Object>();
 
 	public Region(RegionData data) {
@@ -40,6 +43,7 @@ public class Region implements Bounded {
 		priority = data.getPriority();
 		worldId = data.getWorldId();
 		owners = new HashSet<UUID>(data.getOwners());
+		members = new HashSet<UUID>(data.getMembers());
 		for (String flagKey: data.getFlags().keySet()) {
 			Flag flag = Flag.fromKey(flagKey);
 			if (flag != null) {
@@ -106,6 +110,10 @@ public class Region implements Bounded {
 		for (Flag f: flags.keySet()) {
 			serializedFlags.put(f.getName(), f.serializeValue(flags.get(f)));
 		}
-		return new RegionData(minX, minY, minZ, maxX, maxY, maxZ, id, parentId, worldId, priority, owners, serializedFlags);
+		return new RegionData(minX, minY, minZ, maxX, maxY, maxZ, id, parentId, worldId, priority, owners, members, serializedFlags);
+	}
+
+	public RegionPermissionState getPermissionFlag(PermissionFlag flag) {
+		return flag.getValue(flags.get(flag));
 	}
 }

@@ -8,11 +8,7 @@ public class MobSpawningFlag extends BooleanFlag {
 
 	private MobSpawningFlag() {
 		super("mobspawning", "Mob spawning");
-		try {
 			Flag.register(flag);
-		} catch (AlreadyRegisteredException e) {
-			SubdivisionPlugin.debug("Failed to register: " + flag.getName() + " (Already registered)");
-		}
 	}
 
 }

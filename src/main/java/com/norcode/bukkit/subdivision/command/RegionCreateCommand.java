@@ -25,19 +25,7 @@ public class RegionCreateCommand extends BaseCommand {
 		Player player = (Player) commandSender;
 		CuboidSelection selection = null;
 
-		if (!args.isEmpty()) {
-			for (String arg: args) {
-				if (arg.toLowerCase().equals("-we")) {
-					selection = CuboidSelection.fromWorldEdit(plugin, player);
-					break;
-				}
-			}
-		}
-
-		if (selection == null) {
-			selection = plugin.getPlayerSelection(player);
-		}
-
+		selection = CuboidSelection.fromWorldEdit(plugin, player);
 		if (selection == null) {
 			throw new CommandError("You have not made a valid selection.");
 		}

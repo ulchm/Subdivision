@@ -1,19 +1,24 @@
 package com.norcode.bukkit.subdivision.listener;
 
 import com.norcode.bukkit.subdivision.SubdivisionPlugin;
+import com.norcode.bukkit.subdivision.flag.perm.BuildingFlag;
+import com.norcode.bukkit.subdivision.flag.perm.RegionPermissionState;
 import com.norcode.bukkit.subdivision.region.Region;
 import com.norcode.bukkit.subdivision.region.RegionSet;
 import com.norcode.bukkit.subdivision.rtree.Bounds;
 import com.norcode.bukkit.subdivision.rtree.Node;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.metadata.LazyMetadataValue;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -21,6 +26,7 @@ import java.util.concurrent.Callable;
 public class PlayerListener implements Listener {
 
 	SubdivisionPlugin plugin;
+
 
 	public PlayerListener(SubdivisionPlugin plugin) {
 		this.plugin = plugin;
@@ -57,5 +63,13 @@ public class PlayerListener implements Listener {
 				|| !from.getWorld().getUID().equals(to.getWorld().getUID())) {
 			event.getPlayer().getMetadata("subdivisions-active-regionset").get(0).invalidate();
 		}
+	}
+
+	@EventHandler(ignoreCancelled=true)
+	public void onPlayerBreakBlock(BlockBreakEvent event) {
+		Player p = event.getPlayer();
+		RegionSet rs = plugin.getActiveRegionSet(p);
+		Material blockType = event.getBlock().getType();
+		rs.getPermissionFlag(BuildingFlag.flag);
 	}
 }

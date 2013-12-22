@@ -3,10 +3,13 @@ package com.norcode.bukkit.subdivision.region;
 import com.norcode.bukkit.subdivision.rtree.Node;
 import com.norcode.bukkit.subdivision.SubdivisionPlugin;
 import com.norcode.bukkit.subdivision.datastore.RegionData;
+import org.bukkit.Location;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class RegionManager {
@@ -14,8 +17,15 @@ public class RegionManager {
 	private SubdivisionPlugin plugin;
 	private HashMap<UUID, Node> worldTrees = new HashMap<UUID, Node>();
 	private HashMap<UUID, Region> regionMap = new HashMap<UUID, Region>();
+	private LinkedHashMap<Location, RegionSet> cache;
+
 	public RegionManager(SubdivisionPlugin plugin) {
 		this.plugin = plugin;
+		cache = new LinkedHashMap(100, .75F, true) {
+			public boolean removeEldestEntry(Map.Entry eldest) {
+				return size() > 100;
+			}
+		};
 	}
 
 	public void initialize(List<RegionData> data) {
@@ -55,6 +65,11 @@ public class RegionManager {
 			this.worldTrees.put(region.getWorldId(), node);
 		}
 		return node;
+	}
+
+	public RegionSet getActiveRegionSet(Location loc) {
+		// TODO
+		return null;
 	}
 
 	public HashMap<UUID, Node> getWorldTrees() {

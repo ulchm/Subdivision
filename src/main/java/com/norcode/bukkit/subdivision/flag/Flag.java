@@ -1,12 +1,14 @@
 package com.norcode.bukkit.subdivision.flag;
 
 import com.google.gson.Gson;
+import com.norcode.bukkit.subdivision.SubdivisionPlugin;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public abstract class Flag<T> {
 
-	private static HashMap<String, Flag> registry = new HashMap<String, Flag>();
+	private static LinkedHashMap<String, Flag> registry = new LinkedHashMap<String, Flag>();
 	protected static Gson gson = new Gson();
 
 	protected String name;
@@ -25,11 +27,12 @@ public abstract class Flag<T> {
 		this.description = description;
 	}
 
-	public static void register(Flag flag) throws AlreadyRegisteredException {
+	public static boolean register(Flag flag) {
 		if (registry.containsKey(flag.getName())) {
-			throw new AlreadyRegisteredException("A flag is already registered under the name '" + flag.getName() + '"');
+			return false;
 		}
 		registry.put(flag.getName().toLowerCase(), flag);
+		return true;
 	}
 
 	public String getName() {
@@ -40,24 +43,15 @@ public abstract class Flag<T> {
 		return registry.get(flagKey.toLowerCase());
 	}
 
-	public static class AlreadyRegisteredException extends Exception {
-		public AlreadyRegisteredException() {
-		}
 
-		public AlreadyRegisteredException(String message) {
-			super(message);
-		}
-
-		public AlreadyRegisteredException(String message, Throwable cause) {
-			super(message, cause);
-		}
-
-		public AlreadyRegisteredException(Throwable cause) {
-			super(cause);
-		}
-
-		public AlreadyRegisteredException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-			super(message, cause, enableSuppression, writableStackTrace);
+	public static void setupFlags(SubdivisionPlugin subdivisionPlugin) {
+		for (Flag f: registry.values()) {
+			f.onEnable(subdivisionPlugin);
 		}
 	}
+
+	protected void onEnable(SubdivisionPlugin plugin) {
+	}
+
+	protected void onDisable() {}
 }

@@ -4,12 +4,15 @@ import com.norcode.bukkit.subdivision.command.DebugCommand;
 import com.norcode.bukkit.subdivision.command.RegionCommand;
 import com.norcode.bukkit.subdivision.datastore.Datastore;
 import com.norcode.bukkit.subdivision.datastore.DatastoreException;
+import com.norcode.bukkit.subdivision.flag.Flag;
 import com.norcode.bukkit.subdivision.listener.PlayerListener;
 import com.norcode.bukkit.subdivision.region.CuboidSelection;
 import com.norcode.bukkit.subdivision.region.Region;
 import com.norcode.bukkit.subdivision.region.RegionManager;
+import com.norcode.bukkit.subdivision.region.RegionSet;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -49,6 +52,7 @@ public class SubdivisionPlugin extends JavaPlugin {
 
 	private void setupEvents() {
 		this.playerListener = new PlayerListener(this);
+		Flag.setupFlags(this);
 	}
 
 	private void setupCommands() {
@@ -81,6 +85,10 @@ public class SubdivisionPlugin extends JavaPlugin {
 		if (debugMode) {
 			Bukkit.getServer().getLogger().info(s);
 		}
+	}
+
+	public RegionSet getActiveRegionSet(Player player) {
+		return (RegionSet) player.getMetadata("subdivisions-active-regionset").get(0).value();
 	}
 
 	public RegionManager getRegionManager() {

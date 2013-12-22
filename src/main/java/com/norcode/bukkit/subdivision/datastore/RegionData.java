@@ -25,6 +25,7 @@ public class RegionData {
 
 	private final int priority;
 	private final Set<UUID> owners;
+	private final Set<UUID> members;
 	private final Map<String, String> flags;
 
 	public RegionData(
@@ -35,7 +36,7 @@ public class RegionData {
 			UUID worldId,
 			int priority,
 			Set<UUID> owners,
-			Map<String, String> flags) {
+			Set<UUID> members, Map<String, String> flags) {
 
 		this.minX = minX;
 		this.minY = minY;
@@ -48,6 +49,7 @@ public class RegionData {
 		this.worldId = worldId;
 		this.priority = priority;
 		this.owners = owners;
+		this.members = members;
 		this.flags = flags;
 	}
 
@@ -63,6 +65,7 @@ public class RegionData {
 		this.parentId = null;
 		this.flags = new HashMap<String, String>();
 		this.owners = new HashSet<UUID>();
+		this.members = new HashSet<UUID>();
 		this.priority = 0;
 	}
 
@@ -108,6 +111,10 @@ public class RegionData {
 
 	public Set<UUID> getOwners() {
 		return owners;
+	}
+
+	public Set<UUID> getMembers() {
+		return members;
 	}
 
 	public Map<String, String> getFlags() {
