@@ -1,43 +1,52 @@
 package com.norcode.bukkit.subdivision.region;
 
-import com.norcode.bukkit.subdivision.flag.perm.BuildingFlag;
 import com.norcode.bukkit.subdivision.flag.perm.PermissionFlag;
 import com.norcode.bukkit.subdivision.flag.perm.RegionPermissionState;
 
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 public class RegionSet {
 
-	List<Region> regions;
-
-	HashMap<PermissionFlag, RegionPermissionState> cachedPerms = new HashMap<PermissionFlag, RegionPermissionState>();
+	Region parent = null;
+	Region region;
 
 	public RegionSet(LinkedList<Region> regions) {
-		this.regions = regions;
+		if (regions.size() == 1) {
+			region = regions.get(0);
+		} else {
+			if (regions.get(0).getParentId() == null) {
+				parent = regions.get(0);
+				region = regions.get(1);
+
+			} else {
+				parent = regions.get(1);
+				region = regions.get(0);
+			}
+			assert region.getParentId().equals(parent.getId());
+		}
 	}
 
-	public List<Region> getRegions() {
-		return regions;
+	public boolean hasParent() {
+		return parent != null;
+	}
+
+	public Region getParent() {
+		return parent;
+	}
+
+	public Region getRegion() {
+		return region;
 	}
 
 	public RegionPermissionState getPermissionFlag(PermissionFlag flag) {
-		if (!cachedPerms.containsKey(flag)) {
-			RegionPermissionState state = null;
-			Region region = null;
-			// Figure out what the current state of the perm flag is
-			for (Region r: this.regions) {
-				if (state == null) {
-					state = r.getPermissionFlag(flag);
-					region = r;
-					continue;
-				}
-				// TODO: Actually support more than 1 region :)
-			}
-			// cache it
-			cachedPerms.put(flag, state);
+		RegionPermissionState state = region.getPermissionFlag(flag);
+		if (state ==  null && parent != null) {
+			return parent.getPermissionFlag(flag);
 		}
-		return cachedPerms.get(flag);
+		return state;
 	}
 }
