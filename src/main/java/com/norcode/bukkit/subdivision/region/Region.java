@@ -1,13 +1,16 @@
 package com.norcode.bukkit.subdivision.region;
 
 
+import com.norcode.bukkit.subdivision.SubdivisionPlugin;
 import com.norcode.bukkit.subdivision.flag.perm.BuildingFlag;
+import com.norcode.bukkit.subdivision.flag.perm.PVPFlag;
 import com.norcode.bukkit.subdivision.flag.perm.PermissionFlag;
 import com.norcode.bukkit.subdivision.flag.perm.RegionPermissionState;
 import com.norcode.bukkit.subdivision.rtree.Bounded;
 import com.norcode.bukkit.subdivision.rtree.Bounds;
 import com.norcode.bukkit.subdivision.datastore.RegionData;
 import com.norcode.bukkit.subdivision.flag.Flag;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -17,21 +20,22 @@ import java.util.Set;
 import java.util.UUID;
 
 public class Region implements Bounded {
+	private SubdivisionPlugin plugin;
 	private int minX;
 	private int minY;
 	private int minZ;
 	private int maxX;
 	private int maxY;
 	private int maxZ;
-	private int priority;
 	private UUID id;
 	private UUID worldId;
 	private UUID parentId;
 	private Set<UUID> owners;
 	private Set<UUID> members;
-	private Map<Flag, Object> flags = new HashMap<Flag, Object>();
+	protected Map<Flag, Object> flags = new HashMap<Flag, Object>();
 
-	public Region(RegionData data) {
+	public Region(SubdivisionPlugin plugin, RegionData data) {
+		this.plugin = plugin;
 		minX = data.getMinX();
 		minY = data.getMinY();
 		minZ = data.getMinZ();
@@ -40,7 +44,6 @@ public class Region implements Bounded {
 		maxZ = data.getMaxZ();
 		id = data.getId();
 		parentId = data.getParentId();
-		priority = data.getPriority();
 		worldId = data.getWorldId();
 		owners = new HashSet<UUID>(data.getOwners());
 		members = new HashSet<UUID>(data.getMembers());
@@ -110,10 +113,69 @@ public class Region implements Bounded {
 		for (Flag f: flags.keySet()) {
 			serializedFlags.put(f.getName(), f.serializeValue(flags.get(f)));
 		}
-		return new RegionData(minX, minY, minZ, maxX, maxY, maxZ, id, parentId, worldId, priority, owners, members, serializedFlags);
+		return new RegionData(minX, minY, minZ, maxX, maxY, maxZ, id, parentId, worldId, owners, members, serializedFlags);
 	}
 
 	public RegionPermissionState getPermissionFlag(PermissionFlag flag) {
-		return flag.getValue(flags.get(flag));
+		if (!flags.containsKey(flag)) {
+			flags.put(flag, RegionPermissionState.INHERIT);
+		}
+		RegionPermissionState value =  flag.getValue(flags.get(flag));
+		return value;
+	}
+
+
+	public boolean hasParent() {
+		return parentId != null;
+	}
+
+	public boolean hasOwners() {
+		return owners.size() > 0;
+	}
+
+	public boolean hasMembers() {
+		return members.size() > 0;
+	}
+
+	public boolean isMember(Player player) {
+		return members.contains(player.getUniqueId()) || owners.contains(player.getUniqueId());
+	}
+
+	public boolean isOwner(Player player) {
+		return owners.contains(player.getUniqueId());
+	}
+
+	public boolean contains(Location loc) {
+		if (!loc.getWorld().getUID().equals(getWorldId())) return false;
+		int x = loc.getBlockX();
+		int y = loc.getBlockY();
+		int z = loc.getBlockZ();
+		return minX <= x && maxX >= x &&
+				minY <= y && maxY >= y &&
+				minZ <= z && maxZ >= z;
+
+	}
+
+	public void setFlag(Flag flag, Object value) {
+		flags.put(flag, value);
+		plugin.getRegionManager().invalidateCache(this);
+	}
+
+	public boolean allows(PermissionFlag flag, Player player) {
+		RegionPermissionState state = getPermissionFlag(flag);
+		Region check = null;
+		if (state == RegionPermissionState.INHERIT) {
+			if (hasParent()) {
+				check = plugin.getRegionManager().getById(parentId);
+			} else {
+				check = plugin.getRegionManager().getGlobalRegion(worldId);
+			}
+			return check.allows(flag, player);
+		}
+		switch (state) {
+			case OWNERS: return isOwner(player);
+			case MEMBERS: return isMember(player);
+		}
+		return true;
 	}
 }

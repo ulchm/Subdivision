@@ -9,6 +9,5 @@ public class PVPFlag extends PermissionFlag {
 
 	private PVPFlag() {
 		super("pvp", "PVP");
-		Flag.register(flag);
 	}
 }

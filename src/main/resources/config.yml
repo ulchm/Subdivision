@@ -1,3 +1,16 @@
 debug-mode: true
 datastore:
   type: yaml
+
+flags:
+  universe:
+    flags:
+      building: ALL
+      pvp: ALL
+      farming: ALL
+      containers: ALL
+    defaults:
+      building: OWNERS
+      pvp: OWNERS
+      farming: MEMBERS
+      containers: OWNERS

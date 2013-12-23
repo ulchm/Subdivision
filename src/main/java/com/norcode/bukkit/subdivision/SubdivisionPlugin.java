@@ -9,17 +9,13 @@ import com.norcode.bukkit.subdivision.listener.PlayerListener;
 import com.norcode.bukkit.subdivision.region.CuboidSelection;
 import com.norcode.bukkit.subdivision.region.Region;
 import com.norcode.bukkit.subdivision.region.RegionManager;
-import com.norcode.bukkit.subdivision.region.RegionSet;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import javax.security.auth.kerberos.KerberosTicket;
+import java.util.HashMap;
 
 public class SubdivisionPlugin extends JavaPlugin {
 
@@ -34,6 +30,7 @@ public class SubdivisionPlugin extends JavaPlugin {
 
 	// Event Listeners
 	private PlayerListener playerListener;
+	private HashMap<Flag, Object> universalFlagDefaults;
 
 	@Override
 	public void onEnable() {
@@ -42,11 +39,13 @@ public class SubdivisionPlugin extends JavaPlugin {
 
 		if (!loadConfig()) {
 			this.getServer().getPluginManager().disablePlugin(this);
-		} else if (!setupDatastore()) {
+		}
+		setupEvents();
+		if (!setupDatastore()) {
 			this.getServer().getPluginManager().disablePlugin(this);
 		}
 		setupCommands();
-		setupEvents();
+
 
 	}
 
@@ -87,8 +86,8 @@ public class SubdivisionPlugin extends JavaPlugin {
 		}
 	}
 
-	public RegionSet getActiveRegionSet(Player player) {
-		return (RegionSet) player.getMetadata("subdivisions-active-regionset").get(0).value();
+	public Region getRegion(Player player) {
+		return (Region) player.getMetadata("subdivisions-active-region").get(0).value();
 	}
 
 	public RegionManager getRegionManager() {

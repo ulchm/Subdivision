@@ -1,8 +1,13 @@
 package com.norcode.bukkit.subdivision.flag;
 
-import com.google.gson.Gson;
 import com.norcode.bukkit.subdivision.SubdivisionPlugin;
+import com.norcode.bukkit.subdivision.flag.perm.BuildingFlag;
+import com.norcode.bukkit.subdivision.flag.perm.ContainersFlag;
+import com.norcode.bukkit.subdivision.flag.perm.FarmingFlag;
+import com.norcode.bukkit.subdivision.flag.perm.PVPFlag;
+import org.bukkit.craftbukkit.libs.com.google.gson.Gson;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -45,6 +50,13 @@ public abstract class Flag<T> {
 
 
 	public static void setupFlags(SubdivisionPlugin subdivisionPlugin) {
+		// register stock flags
+		register(PVPFlag.flag);
+		register(ContainersFlag.flag);
+		register(BuildingFlag.flag);
+		register(FarmingFlag.flag);
+
+		// enable all registered flags.
 		for (Flag f: registry.values()) {
 			f.onEnable(subdivisionPlugin);
 		}
@@ -54,4 +66,8 @@ public abstract class Flag<T> {
 	}
 
 	protected void onDisable() {}
+
+	public static Collection<Flag> getAllFlags() {
+		return registry.values();
+	}
 }

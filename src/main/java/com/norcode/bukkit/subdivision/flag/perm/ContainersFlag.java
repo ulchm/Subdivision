@@ -9,6 +9,5 @@ public class ContainersFlag extends PermissionFlag {
 
 	private ContainersFlag() {
 		super("containers", "Containers");
-		Flag.register(flag);
 	}
 }

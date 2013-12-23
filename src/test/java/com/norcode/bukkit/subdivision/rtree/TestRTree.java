@@ -27,17 +27,17 @@ public class TestRTree {
 	Bounds b3 = new Bounds(6, 6, 6, 8, 8, 8);
 	Bounds b4 = new Bounds(4, 4, 4, 10, 10, 10);
 
-	Region i1 = new Region(new RegionData((int)b1.getMin().getX(), (int)b1.getMin().getY(), (int)b1.getMin().getZ(),
+	Region i1 = new Region(null, new RegionData((int)b1.getMin().getX(), (int)b1.getMin().getY(), (int)b1.getMin().getZ(),
 										  (int)b1.getMax().getX(), (int)b1.getMax().getY(), (int)b1.getMax().getZ(),
-										  UUID.randomUUID(), null, UUID.randomUUID(), 1,
+										  UUID.randomUUID(), null, UUID.randomUUID(),
 										  new HashSet<UUID>(), new HashSet<UUID>(), new HashMap<String, String>()));
-	Region i2 = new Region(new RegionData((int)b2.getMin().getX(), (int)b2.getMin().getY(), (int)b2.getMin().getZ(),
+	Region i2 = new Region(null, new RegionData((int)b2.getMin().getX(), (int)b2.getMin().getY(), (int)b2.getMin().getZ(),
 										  (int)b2.getMax().getX(), (int)b2.getMax().getY(), (int)b2.getMax().getZ(),
-										  UUID.randomUUID(), null, UUID.randomUUID(), 1,
+										  UUID.randomUUID(), null, UUID.randomUUID(),
 										  new HashSet<UUID>(), new HashSet<UUID>(), new HashMap<String, String>()));
-	Region i3 = new Region(new RegionData((int)b3.getMin().getX(), (int)b3.getMin().getY(), (int)b3.getMin().getZ(),
+	Region i3 = new Region(null, new RegionData((int)b3.getMin().getX(), (int)b3.getMin().getY(), (int)b3.getMin().getZ(),
 										  (int)b3.getMax().getX(), (int)b3.getMax().getY(), (int)b3.getMax().getZ(),
-										  UUID.randomUUID(), null, UUID.randomUUID(), 1,
+										  UUID.randomUUID(), null, UUID.randomUUID(),
 										  new HashSet<UUID>(), new HashSet<UUID>(), new HashMap<String, String>()));
 
 	@Test
@@ -112,11 +112,11 @@ public class TestRTree {
 
 	@Test
 	public void testSearchMore() {
-		Region r1 = new Region(new RegionData(11,86,335,34,106,351,
-				UUID.randomUUID(), null, UUID.randomUUID(), 1,
+		Region r1 = new Region(null, new RegionData(11,86,335,34,106,351,
+				UUID.randomUUID(), null, UUID.randomUUID(),
 				new HashSet<UUID>(), new HashSet<UUID>(), new HashMap<String, String>()));
-		Region r2 = new Region(new RegionData(7,70,306,11,73,312,
-				UUID.randomUUID(), null, UUID.randomUUID(), 1,
+		Region r2 = new Region(null, new RegionData(7,70,306,11,73,312,
+				UUID.randomUUID(), null, UUID.randomUUID(),
 				new HashSet<UUID>(), new HashSet<UUID>(), new HashMap<String, String>()));
 
 		Node tree = Node.create();

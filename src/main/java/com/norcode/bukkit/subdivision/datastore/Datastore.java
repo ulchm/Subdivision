@@ -51,7 +51,8 @@ public abstract class Datastore {
 
 		try {
 			plugin.getRegionManager().initialize(loadRegions());
-			plugin.debug("Loaded " + plugin.getRegionManager().getAll().size() + " Regions in " + plugin.getRegionManager().getWorldTrees().size() + " worlds");
+			plugin.debug("Loaded " + plugin.getRegionManager().getAll().size() + " Regions in " +
+					plugin.getRegionManager().getGlobalRegionCount() + " worlds");
 		} catch (DatastoreException e) {
 			e.printStackTrace();
 			return false;

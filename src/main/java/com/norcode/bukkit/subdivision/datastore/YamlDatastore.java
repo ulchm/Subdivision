@@ -54,7 +54,7 @@ public class YamlDatastore extends Datastore {
 		Set<UUID> owners;
 		Set<UUID> members;
 		Map<String, String> flags;
-		int minX, minY, minZ, maxX, maxY, maxZ, priority;
+		int minX, minY, minZ, maxX, maxY, maxZ;
 
 		ConfigurationSection cfg;
 		ConfigurationSection flagCfg;
@@ -84,7 +84,6 @@ public class YamlDatastore extends Datastore {
 				} else {
 					parentId = UUID.fromString(cfg.getString("parent"));
 				}
-				priority = cfg.getInt("priority", 0);
 				owners = new HashSet<UUID>();
 				for (String uuidS: cfg.getStringList("owners")) {
 					owners.add(UUID.fromString(uuidS));
@@ -100,7 +99,7 @@ public class YamlDatastore extends Datastore {
 						flags.put(key.toLowerCase(), flagCfg.getString(key));
 					}
 				}
-				results.add(new RegionData(minX, minY, minZ, maxX, maxY, maxZ, id, parentId, worldId, priority, owners, members, flags));
+				results.add(new RegionData(minX, minY, minZ, maxX, maxY, maxZ, id, parentId, worldId, owners, members, flags));
 			}
 		}
 		return results;
@@ -122,7 +121,6 @@ public class YamlDatastore extends Datastore {
 	private ConfigurationSection saveRegionData(RegionData data) {
 		ConfigurationSection cfg = getConfig().createSection(data.getWorldId().toString() + "." + data.getId().toString());
 		cfg.set("bounds", Arrays.asList(new Integer[] {data.getMinX(), data.getMinY(), data.getMinZ(), data.getMaxX(), data.getMaxY(), data.getMaxZ()}));
-		cfg.set("priority", data.getPriority());
 		if (data.getParentId() != null) {
 			cfg.set("parent", data.getParentId().toString());
 		}

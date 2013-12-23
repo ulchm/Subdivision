@@ -9,6 +9,5 @@ public class BuildingFlag extends PermissionFlag {
 
 	private BuildingFlag() {
 		super("building", "Building");
-		Flag.register(flag);
 	}
 }
