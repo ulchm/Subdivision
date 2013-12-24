@@ -3,6 +3,8 @@ author: ${project.authors}
 version: ${project.version}
 name: ${project.name}
 softdepend: ${project.softdepend}
+depend: ${project.depend}
+
 commands:
   region:
     aliases: [sd]

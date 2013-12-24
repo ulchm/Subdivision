@@ -68,12 +68,12 @@ public abstract class Datastore {
 		}
 	}
 
-	public static Datastore create(SubdivisionPlugin subdivisionPlugin) throws DatastoreException {
-		ConfigurationSection cfg = subdivisionPlugin.getConfig().getConfigurationSection("datastore");
+	public static Datastore create(SubdivisionPlugin plugin) throws DatastoreException {
+		ConfigurationSection cfg = plugin.getConfig().getConfigurationSection("datastore");
 		Class<? extends Datastore> impl = getImplementation(cfg.getString("type"));
 		Datastore store = null;
 		try {
-			store = impl.getConstructor(SubdivisionPlugin.class).newInstance(subdivisionPlugin);
+			store = impl.getConstructor(SubdivisionPlugin.class).newInstance(plugin);
 		} catch (NoSuchMethodException e) {
 			throw new DatastoreException(e);
 		} catch (InvocationTargetException e) {

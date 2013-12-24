@@ -326,7 +326,7 @@ public class Bounds implements Cloneable {
 	 * Get a String representation of the Bounds.
 	 */
 	public String toString() {
-		return getClass().getName() + " (0x" + Long.toHexString(hashCode()) + ") [(x1=" + x1 + ",y1=" + y1 + ",z1=" + z1 + "), (x2=" + x2 + ",y2=" + y2 + ",z2=" + z2 + ")]";
+		return "(X:" + x1 + ",Y:" + y1 + ",Z:" + z1 + ") -> (X:" + x2 + "Y:" + y2 + ",Z:" + z2 + ")";
 	}
 	
 	/**

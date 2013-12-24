@@ -2,6 +2,7 @@ package com.norcode.bukkit.subdivision.region;
 
 
 import com.norcode.bukkit.subdivision.SubdivisionPlugin;
+import com.norcode.bukkit.subdivision.datastore.DatastoreException;
 import com.norcode.bukkit.subdivision.flag.perm.BuildingFlag;
 import com.norcode.bukkit.subdivision.flag.perm.PVPFlag;
 import com.norcode.bukkit.subdivision.flag.perm.PermissionFlag;
@@ -159,6 +160,11 @@ public class Region implements Bounded {
 	public void setFlag(Flag flag, Object value) {
 		flags.put(flag, value);
 		plugin.getRegionManager().invalidateCache(this);
+		try {
+			plugin.getDatastore().saveRegion(getRegionData());
+		} catch (DatastoreException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public boolean allows(PermissionFlag flag, Player player) {
@@ -177,5 +183,17 @@ public class Region implements Bounded {
 			case MEMBERS: return isMember(player);
 		}
 		return true;
+	}
+
+	public Set<UUID> getOwnerIds() {
+		return owners;
+	}
+
+	public Set<UUID> getMemberIds() {
+		return members;
+	}
+
+	public Object getFlag(Flag f) {
+		return flags.get(f);
 	}
 }
