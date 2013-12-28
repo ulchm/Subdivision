@@ -116,16 +116,6 @@ public class Region implements Bounded {
 		}
 		return new RegionData(minX, minY, minZ, maxX, maxY, maxZ, id, parentId, worldId, owners, members, serializedFlags);
 	}
-
-	public RegionPermissionState getPermissionFlag(PermissionFlag flag) {
-		if (!flags.containsKey(flag)) {
-			flags.put(flag, RegionPermissionState.INHERIT);
-		}
-		RegionPermissionState value =  flag.getValue(flags.get(flag));
-		return value;
-	}
-
-
 	public boolean hasParent() {
 		return parentId != null;
 	}
@@ -168,15 +158,10 @@ public class Region implements Bounded {
 	}
 
 	public boolean allows(PermissionFlag flag, Player player) {
-		RegionPermissionState state = getPermissionFlag(flag);
+		RegionPermissionState state = flag.get(this);
 		Region check = null;
 		if (state == RegionPermissionState.INHERIT) {
-			if (hasParent()) {
-				check = plugin.getRegionManager().getById(parentId);
-			} else {
-				check = plugin.getRegionManager().getGlobalRegion(worldId);
-			}
-			return check.allows(flag, player);
+			return getParent().allows(flag, player);
 		}
 		switch (state) {
 			case OWNERS: return isOwner(player);
@@ -195,5 +180,12 @@ public class Region implements Bounded {
 
 	public Object getFlag(Flag f) {
 		return flags.get(f);
+	}
+
+	public Region getParent() {
+		if (this.hasParent()) {
+			return plugin.getRegionManager().getById(this.parentId);
+		}
+		return null;
 	}
 }

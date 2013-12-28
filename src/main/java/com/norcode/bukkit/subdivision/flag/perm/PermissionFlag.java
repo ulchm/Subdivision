@@ -1,11 +1,21 @@
 package com.norcode.bukkit.subdivision.flag.perm;
 
 import com.norcode.bukkit.subdivision.flag.Flag;
+import com.norcode.bukkit.subdivision.region.Region;
 
 public class PermissionFlag extends Flag<RegionPermissionState> {
 
 	protected PermissionFlag(String name, String desc) {
 		super(name, desc);
+	}
+
+	@Override
+	public RegionPermissionState get(Region r) {
+		RegionPermissionState ps = getValue(r);
+		if (ps == RegionPermissionState.INHERIT) {
+			return getValue(r.getParent().getFlag(this));
+		}
+		return ps;
 	}
 
 	@Override

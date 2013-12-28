@@ -1,5 +1,7 @@
 package com.norcode.bukkit.subdivision.flag;
 
+import com.norcode.bukkit.subdivision.region.Region;
+
 import java.util.List;
 
 public class StringListFlag extends Flag<List<String>> {
@@ -10,6 +12,11 @@ public class StringListFlag extends Flag<List<String>> {
 
 	protected StringListFlag(String name, String description) {
 		super(name, description);
+	}
+
+	@Override
+	public List<String> get(Region r) {
+		return (List<String>) r.getFlag(this);
 	}
 
 	@Override

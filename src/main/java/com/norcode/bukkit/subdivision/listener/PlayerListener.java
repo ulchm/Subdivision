@@ -5,10 +5,9 @@ import com.norcode.bukkit.subdivision.flag.perm.BuildingFlag;
 import com.norcode.bukkit.subdivision.flag.perm.ContainersFlag;
 import com.norcode.bukkit.subdivision.flag.perm.FarmingFlag;
 import com.norcode.bukkit.subdivision.flag.perm.PVPFlag;
-import com.norcode.bukkit.subdivision.flag.perm.RegionPermissionState;
+import com.norcode.bukkit.subdivision.region.CuboidSelection;
 import com.norcode.bukkit.subdivision.region.Region;
-import com.norcode.bukkit.subdivision.rtree.Bounds;
-import com.norcode.bukkit.subdivision.rtree.Node;
+import com.norcode.bukkit.subdivision.selection.SelectionVisualization;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -17,16 +16,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.LazyMetadataValue;
 
 import java.util.EnumSet;
-import java.util.LinkedList;
 import java.util.concurrent.Callable;
 
 public class PlayerListener implements Listener {
@@ -63,84 +66,52 @@ public class PlayerListener implements Listener {
 		}
 	}
 
-	@EventHandler(ignoreCancelled=true)
-	public void onPlayerBreakBlock(BlockBreakEvent event) {
-		Player p = event.getPlayer();
-		Material blockType = event.getBlock().getType();
-		Region r = plugin.getRegionManager().getRegion(event.getBlock().getLocation());
-		if (r.allows(BuildingFlag.flag, p) ||
-				(r.allows(FarmingFlag.flag, p) && isBreakingCrop(blockType))) {
-			return;
-		} else {
+
+	@EventHandler
+	public void onPlayerChangeToFromWand(PlayerItemHeldEvent event) {
+
+		ItemStack leaving = event.getPlayer().getInventory().getItem(event.getPreviousSlot());
+		ItemStack goingTo = event.getPlayer().getInventory().getItem(event.getNewSlot());
+
+		if (isWandItem(leaving) && !isWandItem(goingTo)) {
+			plugin.getRenderManager().getRenderer(event.getPlayer()).clear();
+		} else if (isWandItem(goingTo)) {
+			CuboidSelection sel = plugin.getPlayerSelection(event.getPlayer());
+			if (sel.isValid()) {
+				SelectionVisualization viz = new SelectionVisualization(plugin, event.getPlayer(), event.getPlayer().getWorld(), sel.getBounds());
+				plugin.getRenderManager().getRenderer(event.getPlayer()).draw(viz);
+			}
+		}
+
+	}
+
+	@EventHandler
+	public void onPlayerClickWand(PlayerInteractEvent event) {
+		if (isWandItem(event.getItem())) {
+			Player p = event.getPlayer();
+			CuboidSelection selection = plugin.getPlayerSelection(p);
+			if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+				event.getPlayer().sendMessage("Set Pt.2 to " + event.getClickedBlock().getLocation());
+				selection.setP2(event.getClickedBlock().getLocation());
+			} else if (event.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
+				event.getPlayer().sendMessage("Set Pt.1 to " + event.getClickedBlock().getLocation());
+				selection.setP1(event.getClickedBlock().getLocation());
+			} else {
+				return;
+			}
 			event.setCancelled(true);
-			p.sendMessage(ChatColor.RED + "You don't have permission to break blocks here.");
-		}
-	}
-
-	@EventHandler(ignoreCancelled=true)
-	public void onPlayerPlaceBlock(BlockPlaceEvent event) {
-		Player p = event.getPlayer();
-		Material blockType = event.getBlock().getType();
-		Region r = plugin.getRegionManager().getRegion(event.getBlock().getLocation());
-		if (r.allows(BuildingFlag.flag, p) ||
-				(r.allows(FarmingFlag.flag, p) && isPlacingCrop(blockType))) {
-			return;
-		} else {
-			event.setCancelled(true);
-			p.sendMessage(ChatColor.RED + "You don't have permission to place blocks here.");
-		}
-	}
-
-	@EventHandler(ignoreCancelled=true)
-	public void onPlayerOpenInventory(InventoryOpenEvent event) {
-		if (event.getInventory().getHolder() != null && event.getInventory().getHolder() instanceof BlockState) {
-			Location loc = ((BlockState) event.getInventory().getHolder()).getLocation();
-			Region rs = plugin.getRegionManager().getRegion(loc);
-			if (!rs.allows(ContainersFlag.flag, (Player) event.getPlayer())) {
-				event.setCancelled(true);
-				((Player)event.getPlayer()).sendMessage(ChatColor.RED +
-						"You do not have permission to open containers here.");
+			if (selection.isValid()) {
+				SelectionVisualization viz = new SelectionVisualization(plugin, p, p.getWorld(), selection.getBounds());
+				plugin.getRenderManager().getRenderer(p).draw(viz);
 			}
 		}
 	}
 
-	@EventHandler(ignoreCancelled=true)
-	public void onEntityDamageByEntityEvent(EntityDamageByEntityEvent event) {
-		if (event.getEntity() instanceof Player) {
-			Player player = null;
-			if (event.getDamager() instanceof Player) {
-				player = (Player) event.getDamager();
-			} else if (event.getDamager() instanceof Projectile) {
-				if (((Projectile) event.getDamager()).getShooter() instanceof Player) {
-					player = (Player) ((Projectile) event.getDamager()).getShooter();
-				}
-			}
-			Region r = plugin.getRegionManager().getRegion(event.getEntity().getLocation());
-			if (!r.allows(PVPFlag.flag, player)) {
-				event.setCancelled(true);
-				player.sendMessage(ChatColor.RED + "You do not have PVP permissions here!");
-			}
-		}
+
+	private boolean isWandItem(ItemStack item) {
+		return item != null && item.getType().equals(Material.GOLD_SPADE);
 	}
 
-	public static EnumSet<Material> ALLOWED_FARMING_BLOCKBREAKS = EnumSet.of(
-		Material.COCOA, Material.MELON_BLOCK, Material.MELON_STEM, Material.PUMPKIN_STEM, Material.PUMPKIN,
-		Material.LONG_GRASS, Material.RED_MUSHROOM, Material.BROWN_MUSHROOM, Material.HUGE_MUSHROOM_2,
-		Material.HUGE_MUSHROOM_1, Material.SUGAR_CANE_BLOCK, Material.CROPS, Material.CACTUS, Material.POTATO,
-		Material.CARROT, Material.WHEAT, Material.NETHER_STALK
-	);
 
-	public static EnumSet<Material> ALLOWED_FARMING_BLOCKPLACES = ALLOWED_FARMING_BLOCKBREAKS.clone();
-	static {
-		ALLOWED_FARMING_BLOCKPLACES.remove(Material.PUMPKIN);
-		ALLOWED_FARMING_BLOCKPLACES.remove(Material.MELON_BLOCK);
-	}
 
-	private boolean isBreakingCrop(Material blockType) {
-		return ALLOWED_FARMING_BLOCKBREAKS.contains(blockType);
-	}
-
-	public boolean isPlacingCrop(Material blockType) {
-		return ALLOWED_FARMING_BLOCKPLACES.contains(blockType);
-	}
 }

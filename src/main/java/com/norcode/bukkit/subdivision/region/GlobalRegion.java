@@ -58,6 +58,14 @@ public class GlobalRegion extends Region {
 		rtree.insert(region);
 	}
 
+	public boolean hasParent() {
+		return false;
+	}
+
+	public Region getParent() {
+		return this;
+	}
+
 	public boolean allows(PermissionFlag flag, Player player) {
 		RegionPermissionState state = flag.getValue(flags.get(flag));
 		switch (state) {

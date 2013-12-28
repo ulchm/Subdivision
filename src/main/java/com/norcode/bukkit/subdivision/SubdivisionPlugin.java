@@ -9,11 +9,15 @@ import com.norcode.bukkit.subdivision.listener.PlayerListener;
 import com.norcode.bukkit.subdivision.region.CuboidSelection;
 import com.norcode.bukkit.subdivision.region.Region;
 import com.norcode.bukkit.subdivision.region.RegionManager;
+import com.norcode.bukkit.subdivision.selection.RenderManager;
+import com.norcode.bukkit.subdivision.selection.Renderer;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
 
@@ -31,6 +35,8 @@ public class SubdivisionPlugin extends JavaPlugin {
 	// Event Listeners
 	private PlayerListener playerListener;
 	private HashMap<Flag, Object> universalFlagDefaults;
+	private RenderManager renderManager;
+	private BukkitTask renderTask;
 
 	@Override
 	public void onEnable() {
@@ -62,6 +68,8 @@ public class SubdivisionPlugin extends JavaPlugin {
 	private boolean loadConfig() {
 		saveDefaultConfig();
 		debugMode = getConfig().getBoolean("debug-mode", false);
+		renderManager = new RenderManager(this);
+		renderTask = getServer().getScheduler().runTaskTimer(this, renderManager, 1, 1);
 		return true;
 	}
 
@@ -78,6 +86,9 @@ public class SubdivisionPlugin extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		datastore.disable();
+		if (renderTask != null) {
+			renderTask.cancel();
+		}
 	}
 
 	public static void debug(String s) {
@@ -105,11 +116,17 @@ public class SubdivisionPlugin extends JavaPlugin {
 		if (player.hasMetadata("subdivisions-selection")) {
 			return (CuboidSelection) player.getMetadata("subdivisions-selection").get(0).value();
 		}
-		return null;
+		CuboidSelection sel = new CuboidSelection();
+		player.setMetadata("subdivisions-selection", new FixedMetadataValue(this, sel));
+		return sel;
 	}
 
 	public Datastore getDatastore() {
 		return datastore;
+	}
+
+	public RenderManager getRenderManager() {
+		return renderManager;
 	}
 }
 

@@ -210,7 +210,7 @@ public class Bounds implements Cloneable {
 	 * @return the height.
 	 */
 	public int getHeight() {
-		return x2 - x1;
+		return y2 - y1;
 	}
 	
 	/**
@@ -219,7 +219,7 @@ public class Bounds implements Cloneable {
 	 * @return the width.
 	 */
 	public int getWidth() {
-		return y2 - y1;
+		return x2 - x1;
 	}
 	
 	/**

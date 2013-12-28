@@ -1,7 +1,9 @@
 package com.norcode.bukkit.subdivision.flag;
 
 
-public class BooleanFlag extends Flag<Boolean> {
+import com.norcode.bukkit.subdivision.region.Region;
+
+public abstract class BooleanFlag extends Flag<Boolean> {
 
 	public BooleanFlag(String name) {
 		super(name);
@@ -9,6 +11,17 @@ public class BooleanFlag extends Flag<Boolean> {
 
 	public BooleanFlag(String name, String description) {
 		super(name, description);
+	}
+
+	@Override
+	public Boolean get(Region r) {
+		Boolean val = this.getValue(r.getFlag(this));
+		if (val == null) {
+			if (r.hasParent()) {
+				return get(r.getParent());
+			}
+		}
+		return val;
 	}
 
 	@Override
