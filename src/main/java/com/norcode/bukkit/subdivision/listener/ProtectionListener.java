@@ -226,6 +226,7 @@ public class ProtectionListener implements Listener {
 						event.setCancelled(true);
 					}
 				}
+            }
 		}
 	}
 }
